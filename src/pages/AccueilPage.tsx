@@ -1,13 +1,11 @@
-import React from 'react';
 import './style/AccueilPage.css';
 import Menu from '../components/Menu';
 import { useNavigate } from 'react-router-dom';
 import BusCard from '../components/BusCard';
-// import { Navigation } from '@mui/icons-material';
 const AccueilPage = () => {
   const navigate = useNavigate();
     const handleClick = () => {
-        navigate('/statistique');  // Redirige vers la page d'accueil
+        navigate('/feuilleRoute'); 
         console.log("click");
       };
       

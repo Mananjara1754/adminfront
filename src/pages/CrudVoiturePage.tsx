@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './style/CrudVoiturePage.css';
 import Menu from '../components/Menu';
 import { FaTrash, FaEdit, FaPlus } from 'react-icons/fa';
 import { Bus } from '../dto/Bus';
 import BusForm from '../components/BusForm';
-
-// Définissez une interface pour le type de bus
-
 
 const CrudVoiturePage = () => {
   const [buses, setBuses] = useState<Bus[]>([]);
@@ -48,10 +45,6 @@ const CrudVoiturePage = () => {
     handleClosePopup();
   };
 
-  // const handleClick = () => {
-  //   navigate('/accueil');
-  //   console.log("click");
-  // };
 
   return (
     <div className="app">
