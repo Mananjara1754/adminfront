@@ -1,0 +1,147 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #e6f3ff;
+  font-family: Arial, sans-serif;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-card {
+  background-color: white;
+  border-radius: 20px;
+  padding: 40px;
+  width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+   display: flex; 
+   flex-direction: column;
+  justify-content: center;
+  /* text-align: center; */
+}
+
+.logo {
+    align-self: center;
+  font-size: 24px;
+  background-color: black;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+}
+.login-text{
+    font-family: Poppins;
+    font-size: clamp(11px, 1vw, 15px);
+    color: #666;
+    margin-bottom: 20px;
+}
+.password-input {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.forgot-password {
+  display: block;
+  text-align: right;
+  color: #666;
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 12px;
+  font-family: Poppins;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+}
+
+.social-login {
+  margin-top: 20px;
+  text-align: center;
+
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.social-icons button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background-color: white;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.google-login {
+  color: #DB4437;
+}
+
+.facebook-login {
+  color: #4267B2;
+}
+
+.apple-login {
+  color: #000;
+}
+h1{
+    font-family: Poppins-Bold;
+    font-size: clamp(23px, 5vw, 28px);
+    text-align: center;
+}
+
+input{
+    font-family: Poppins;
+    font-size: clamp(11px, 1vw, 15px);
+    margin-top: 10px;
+    width: 92%;   
+}
+error-message{
+    color: orangered;
+    font-family: Poppins;
+    font-size: clamp(11px, 1vw, 15px);
+    margin-top: 10px;
+}

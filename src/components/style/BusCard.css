@@ -1,0 +1,33 @@
+
+.bus-card{
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    padding: 20px;
+    border-radius: 15px;
+    cursor: pointer;
+  }
+  .id_bus{
+    font-family: Poppins-Bold;
+    color:#9FC800;
+    margin-left: 15px;
+    margin-top: 17px;
+  }
+  .bus-icon{
+    display: flex;
+    align-items: center;
+  }
+  .N-mat{
+    display: flex;
+    justify-content: space-between;
+    color: black;
+    font-family: Poppins;
+    font-size: small;
+  }
+  .name{
+    color: black;
+    font-family: Poppins;
+    font-size: small;
+  }
+  /* Add similar styling for other sections */
+  
