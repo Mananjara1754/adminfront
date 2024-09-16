@@ -7,7 +7,7 @@ import BusCard from '../components/BusCard';
 const AccueilPage = () => {
   const navigate = useNavigate();
     const handleClick = () => {
-        navigate('accueil');  // Redirige vers la page d'accueil
+        navigate('/statistique');  // Redirige vers la page d'accueil
         console.log("click");
       };
       
@@ -26,20 +26,47 @@ const AccueilPage = () => {
                 numero_matricule="12345"
                 nb_place={50}
                 action={handleClick}/>
-                {/* <BusCard id_bus='Pers 2' nom_chauffeur='Jane' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 3' nom_chauffeur='John' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 4' nom_chauffeur='Jane' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 5' nom_chauffeur='John' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 1' nom_chauffeur='John' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 2' nom_chauffeur='Jane' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 3' nom_chauffeur='John' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 4' nom_chauffeur='Jane' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 5' nom_chauffeur='John' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 1' nom_chauffeur='John' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 2' nom_chauffeur='Jane' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 3' nom_chauffeur='John' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 4' nom_chauffeur='Jane' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/>
-                <BusCard id_bus='Pers 5' nom_chauffeur='John' prenom_chauffeur='Doe' numero_matricule='123456789' nb_place='2'/> */}
+
+                <BusCard
+                id_bus={'Pers 1'}
+                nom_chauffeur="Nom du chauffeur"
+                prenom_chauffeur="Prénom du chauffeur"
+                numero_matricule="12345"
+                nb_place={50}
+                action={handleClick}/>
+
+                <BusCard
+                id_bus={'Pers 1'}
+                nom_chauffeur="Nom du chauffeur"
+                prenom_chauffeur="Prénom du chauffeur"
+                numero_matricule="12345"
+                nb_place={50}
+                action={handleClick}/>
+
+                <BusCard
+                id_bus={'Pers 1'}
+                nom_chauffeur="Nom du chauffeur"
+                prenom_chauffeur="Prénom du chauffeur"
+                numero_matricule="12345"
+                nb_place={50}
+                action={handleClick}/>
+
+                <BusCard
+                id_bus={'Pers 1'}
+                nom_chauffeur="Nom du chauffeur"
+                prenom_chauffeur="Prénom du chauffeur"
+                numero_matricule="12345"
+                nb_place={50}
+                action={handleClick}/>
+
+                <BusCard
+                id_bus={'Pers 1'}
+                nom_chauffeur="Nom du chauffeur"
+                prenom_chauffeur="Prénom du chauffeur"
+                numero_matricule="12345"
+                nb_place={50}
+                action={handleClick}/>
+
             </div>
         </div>
       </div>

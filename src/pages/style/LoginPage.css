@@ -116,17 +116,7 @@ input {
   font-size: 18px;
 }
 
-.google-login {
-  color: #DB4437;
-}
 
-.facebook-login {
-  color: #4267B2;
-}
-
-.apple-login {
-  color: #000;
-}
 h1{
     font-family: Poppins-Bold;
     font-size: clamp(23px, 5vw, 28px);
