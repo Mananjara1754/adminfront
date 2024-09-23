@@ -6,13 +6,18 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PeopleIcon from '@mui/icons-material/People';
 import './style/Menu.css';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 
 function Menu() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+  const deconnexion = () => {
+    localStorage.removeItem('token');
+    navigate('/');
   };
 
   const menuItems = [
@@ -20,7 +25,7 @@ function Menu() {
     { icon: <PeopleIcon />, label: 'Personnel' ,url:'/people'},
     { icon: <BarChartIcon />, label: 'Statistique' ,url:'/statistique'},
     { icon: <DirectionsBusIcon />, label: 'Feuille de routes',url:'/crudVoiture' },
-    { icon: <LogoutIcon />, label: 'Deconnexion',url:'/' }
+    { icon: <LogoutIcon />, label: 'Deconnexion',url:'/deconnexion' }
 
   ];
 
@@ -40,9 +45,11 @@ function Menu() {
               ,backgroundColor:'#e6f3ff',borderRadius:'100%'}}
             >
              {item.url ? (
-              <Link to={item.url} className='lien-menu'>{item.icon}</Link>
+                item.url === '/deconnexion' ? (
+                  <p onClick={deconnexion} className='lien-menu'>{item.icon}</p>
+                ) : (<Link to={item.url} className='lien-menu'>{item.icon}</Link>)
             ) : (
-              item.icon
+              <Link to={item.url} className='lien-menu'>{item.icon}</Link>
             )}
             </IconButton>
           ))}

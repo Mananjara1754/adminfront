@@ -24,8 +24,7 @@ function LoginPage() {
       });
 
       if (response.data) {
-        localStorage.setItem('token', response.data);
-        // Rediriger l'utilisateur ou mettre à jour l'état de l'application
+        localStorage.setItem('token', response.data.data[1]);
         navigate('/accueil');
       } else {
         setError("Réponse invalide du serveur");
