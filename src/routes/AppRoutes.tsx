@@ -4,6 +4,7 @@ import AccueilPage from "../pages/AccueilPage";
 import StatistiquePage from "../pages/StatistiquePage";
 import CrudVoiturePage from "../pages/CrudVoiturePage";
 import FeuilleRoutePage from "../pages/FeuilleRoutePage";
+import PeoplePage from "../pages/PeoplePage";
 
 const AppRoutes = () => {
     return (
@@ -14,6 +15,7 @@ const AppRoutes = () => {
                 <Route path="/statistique" element={<StatistiquePage />} />
                 <Route path="/crudVoiture" element={<CrudVoiturePage />} />
                 <Route path="/feuilleRoute" element={<FeuilleRoutePage />} />
+                <Route path="/people" element={<PeoplePage />} />
             </Routes>
         </BrowserRouter>
     );

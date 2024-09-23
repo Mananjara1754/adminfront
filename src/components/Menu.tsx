@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add';
 import HomeIcon from '@mui/icons-material/Home';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PeopleIcon from '@mui/icons-material/People';
 import './style/Menu.css';
 import { Link } from 'react-router-dom';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
@@ -16,6 +17,7 @@ function Menu() {
 
   const menuItems = [
     { icon: <HomeIcon />, label: 'Accueil' ,url:'/accueil'},
+    { icon: <PeopleIcon />, label: 'Personnel' ,url:'/people'},
     { icon: <BarChartIcon />, label: 'Statistique' ,url:'/statistique'},
     { icon: <DirectionsBusIcon />, label: 'Feuille de routes',url:'/crudVoiture' },
     { icon: <LogoutIcon />, label: 'Deconnexion',url:'/' }
