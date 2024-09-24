@@ -27,7 +27,7 @@ function LoginPage() {
         localStorage.setItem('token', response.data.data[1]);
         navigate('/accueil');
       } else {
-        setError("Réponse invalide du serveur");
+        setError("Erreur, veuillez vérifier vos identifiants");
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
