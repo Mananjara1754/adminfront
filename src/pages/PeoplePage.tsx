@@ -5,21 +5,33 @@ import { FaTrash, FaEdit, FaPlus } from 'react-icons/fa';
 import { Bus } from '../dto/Bus';
 import axios from 'axios';
 import './style/Spinner.css';
+import { Personnel } from '../dto/Personnel';
 
 const PeoplePage = () => {
-  const [buses, setBuses] = useState<Bus[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [personnelData, setpersonnelData] = useState<Personnel[]>([]);  
+  async function getpersonnelData() {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/listePeople`,{
+        headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}` // Afficher le token dans les en-têtes à partir de localStorage
+      }});
+      console.log("Réponse API : ", response.data); 
+      if (response.data) {
+        setpersonnelData(response.data); 
+      } else {
+        console.error("Les données reçues ne sont pas sous forme de tableau.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'appel à l'API : ", error);
+    }
+  }
+    useEffect(() => { 
+      getpersonnelData();
+    },[]);
 
-  useEffect(() => {
-    // Simuler le chargement des données des bus
-    setBuses([
-      { id: 1, nom: 'Bus 1', chauffeur: 'Jean Dupont', capacite: 50, annee: 2020 },
-      { id: 2, nom: 'Bus 2', chauffeur: 'Marie Martin', capacite: 40, annee: 2019 },
-      // Ajoutez d'autres bus ici
-    ]);
-  }, []); 
 
   const handleAddAllPerson = async () => {
     setIsLoading(true);
@@ -48,22 +60,25 @@ const PeoplePage = () => {
             <table className="bus-table">
               <thead>
                 <tr>
-                  <th>Nom du bus</th>
-                  <th>Chauffeur</th>
-                  <th>Capacité</th>
-                  <th>Année</th>
+                  <th>Matricule</th>
+                  <th>Nom</th>
+                  <th>Prenom</th>
+                  <th>Numero Pers</th>
                 </tr>
               </thead>
               <tbody>
-                {buses.map((bus) => (
-                  <tr key={bus.id}>
-                    <td>{bus.nom}</td>
-                    <td>{bus.chauffeur}</td>
-                    <td className="capacite-column">{bus.capacite}</td>
-                    <td>{bus.annee}</td>
-                    
+              {personnelData && Array.isArray(personnelData) && personnelData.length > 0 ? (
+                  personnelData.map((item) => (
+                  <tr key={item.id_personnel}>
+                    <td>{item.id_personnel}</td>
+                    <td>{item.nom_personnel}</td>
+                    <td>{item.prenom}</td>
+                    <td>{item.numero_personnel}</td>
                   </tr>
-                ))}
+                  ))
+                ) : (
+                  <p>Aucun Personnel disponible</p>
+                )}
               </tbody>
             </table>
           </div>

@@ -1,8 +1,8 @@
-export interface Bus {
-    id: number;
-    nom: string;
-    chauffeur: string;
-    capacite: number;
-    annee : number;
-}
+import { Chauffeur } from "./Chauffeur";
 
+export interface Bus {
+    id_voiture: string;
+    nb_place: number;
+    immatricule: string;    
+    chauffeur: Chauffeur;
+}

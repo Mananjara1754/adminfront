@@ -4,19 +4,36 @@ import Menu from '../components/Menu';
 import { FaTrash, FaEdit, FaPlus } from 'react-icons/fa';
 import { Bus } from '../dto/Bus';
 import BusForm from '../components/BusForm';
+import axios from 'axios';
 
 const CrudVoiturePage = () => {
-  const [buses, setBuses] = useState<Bus[]>([]);
+  const [busData, setBusData] = useState<Bus[]>([]);  
+  async function getBusData() {
+    try {
+      const response = await axios.get(`http://192.168.1.111:8087/listeVehicule`,{
+        headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}` // Afficher le token dans les en-têtes à partir de localStorage
+      }});
+      console.log("Réponse API : ", response.data); 
+      if (response.data && Array.isArray(response.data.data)) {
+        setBusData(response.data.data); 
+      } else {
+        console.error("Les données reçues ne sont pas sous forme de tableau.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'appel à l'API : ", error);
+    }
+  }
+    useEffect(() => { 
+      getBusData();
+    },[]);
+
   const [showPopup, setShowPopup] = useState(false);
   const [currentBus, setCurrentBus] = useState<Bus | null>(null);
 
   useEffect(() => {
     // Simuler le chargement des données des bus
-    setBuses([
-      { id: 1, nom: 'Bus 1', chauffeur: 'Jean Dupont', capacite: 50, annee: 2020 },
-      { id: 2, nom: 'Bus 2', chauffeur: 'Marie Martin', capacite: 40, annee: 2019 },
-      // Ajoutez d'autres bus ici
-    ]);
+    getBusData();
   }, []); 
 
   const handleAddBus = () => {
@@ -37,10 +54,10 @@ const CrudVoiturePage = () => {
   const handleSubmit = (bus: Bus) => {
     if (currentBus) {
       // Logique de modification
-      setBuses(buses.map(b => b.id === bus.id ? bus : b));
+      //setBuses(buses.map(b => b.id === bus.id ? bus : b));
     } else {
       // Logique d'insertion
-      setBuses([...buses, { ...bus, id: Date.now() }]);
+      //setBuses([...buses, { ...bus, id: Date.now() }]);
     }
     handleClosePopup();
   };
@@ -59,26 +76,29 @@ const CrudVoiturePage = () => {
             <table className="bus-table">
               <thead>
                 <tr>
-                  <th>Nom du bus</th>
+                  <th>Immatriculation</th>
                   <th>Chauffeur</th>
                   <th>Capacité</th>
-                  <th>Année</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {buses.map((bus) => (
-                  <tr key={bus.id}>
-                    <td>{bus.nom}</td>
-                    <td>{bus.chauffeur}</td>
-                    <td className="capacite-column">{bus.capacite}</td>
-                    <td>{bus.annee}</td>
+
+                {busData && Array.isArray(busData) && busData.length > 0 ? (
+                  busData.map((item) => (
+                    <tr key={item.immatricule}>
+                    <td>{item.chauffeur.nom_personnel}</td>
+                    <td>{item.immatricule}</td>
+                    <td className="capacite-column">{item.nb_place}</td>
                     <td>
-                      <button className="action-btn edit" onClick={() => handleEditBus(bus)}><FaEdit /></button>
+                      {/* <button className="action-btn edit" onClick={() => handleEditBus(bus)}><FaEdit /></button> */}
                       <button className="action-btn delete"><FaTrash /></button>
                     </td>
                   </tr>
-                ))}
+                  ))
+                ) : (
+                  <p>Aucun bus disponible</p>
+                )}
               </tbody>
             </table>
           </div>
