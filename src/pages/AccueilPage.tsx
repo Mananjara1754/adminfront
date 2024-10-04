@@ -10,7 +10,7 @@ const AccueilPage = () => {
   const [busData, setBusData] = useState<Bus[]>([]);  
   async function getBusData() {
     try {
-      const response = await axios.get(`http://192.168.1.111:8087/listeVehicule`,{
+      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/listeVehicule`,{
         headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}` // Afficher le token dans les en-têtes à partir de localStorage
       }});

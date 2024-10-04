@@ -2,46 +2,116 @@ import { useState, useEffect } from 'react';
 import './style/PeoplePage.css';
 import Menu from '../components/Menu';
 import { FaTrash, FaEdit, FaPlus } from 'react-icons/fa';
-import { Bus } from '../dto/Bus';
 import axios from 'axios';
-import './style/Spinner.css';
 import { Personnel } from '../dto/Personnel';
+import Modal from 'react-modal';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 const PeoplePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const [personnelData, setpersonnelData] = useState<Personnel[]>([]);  
-  async function getpersonnelData() {
+  const [personnelData, setPersonnelData] = useState<Personnel[]>([]);  
+  const [selectedPersonnel, setSelectedPersonnel] = useState<Personnel | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  async function getPersonnelData() {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/listePeople`,{
+      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/listePeople`, {
         headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}` // Afficher le token dans les en-têtes à partir de localStorage
-      }});
-      console.log("Réponse API : ", response.data); 
-      if (response.data) {
-        setpersonnelData(response.data); 
-      } else {
-        console.error("Les données reçues ne sont pas sous forme de tableau.");
-      }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      setPersonnelData(response.data);
     } catch (error) {
-      console.error("Erreur lors de l'appel à l'API : ", error);
+      console.error('Erreur lors de l\'appel à l\'API : ', error);
     }
   }
-    useEffect(() => { 
-      getpersonnelData();
-    },[]);
 
+  useEffect(() => { 
+    getPersonnelData();
+  }, []);
 
+  // Fonction pour supprimer un personnel
+  const handleDeletePersonnel = async (id: string) => {
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/supprimerPersonnel`, {
+        params:{
+          id_personnel:id
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      setPersonnelData(personnelData.filter((personnel) => personnel.id_personnel !== id));
+      toast.success('Personnel supprimé avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la suppression du personnel : ', error);
+      toast.error('Erreur lors de la suppression du personnel');
+    }
+  };
+  const handleUpdateMdpPersonnel = async (id_personnel:string) => {
+    try {
+      await axios.post(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/modifMdp`, {
+        id_personnel:id_personnel,
+        mdp:password,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+      toast.success('Mot de passe modifié avec succès');
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Erreur lors de la modififaction du mot de passe du personnel : ', error);
+      toast.error('Erreur lors de la modififaction du mot de passe du personnel');
+    }
+  };
+
+  // Ouvrir la modale pour modifier le personnel
+  const handleEditPersonnel = (personnel: Personnel) => {
+    setSelectedPersonnel(personnel);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdatePersonnel = async () => {
+    if (selectedPersonnel) {
+      try {
+        console.log(selectedPersonnel)
+        await axios.put(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/modifierPersonnel`, {
+          id_personnel:selectedPersonnel.id_personnel,
+          numero_personnel:selectedPersonnel.numero_personnel,
+          adresse:selectedPersonnel.adresse,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          }
+        });
+        const updatedPersonnelList = personnelData.map((personnel) =>
+          personnel.id_personnel === selectedPersonnel.id_personnel ? selectedPersonnel : personnel
+        );
+        setPersonnelData(updatedPersonnelList);
+        toast.success('Personnel mis à jour avec succès');
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour du personnel : ', error);
+        toast.error('Erreur lors de la mise à jour du personnel');
+      }
+    }
+  };
+
+  // Fonction pour ajouter tous les personnels (conservée)
   const handleAddAllPerson = async () => {
     setIsLoading(true);
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/inscription`);
       setError("");
+      toast.success('Tous les personnels ont été ajoutés avec succès !');
     } catch (error) {
       setError("Une erreur inattendue s'est produite");
-    }
-    finally {
+      toast.error("Erreur lors de l'ajout de tous les personnels");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -49,11 +119,12 @@ const PeoplePage = () => {
   return (
     <div className="app">
       <Menu />
+      <ToastContainer /> {/* Container pour afficher les notifications */}
       <div className="main-content">
         <div className="container">
           <h1>Liste des personnes</h1>
           <button className="add-bus-btn" onClick={handleAddAllPerson} disabled={isLoading}>
-          {isLoading ? <div className="spinner"></div> : 'Ajouter tous les personnes' }
+            {isLoading ? <div className="spinner"></div> : 'Ajouter tous les personnes'}
           </button>
           {error && <p className="error-message" style={{color:'orangered',textAlign:'center'}}>{error}</p>}
           <div className="liste-bus-container">
@@ -62,19 +133,30 @@ const PeoplePage = () => {
                 <tr>
                   <th>Matricule</th>
                   <th>Nom</th>
-                  <th>Prenom</th>
-                  <th>Numero Pers</th>
+                  <th>Prénom</th>
+                  <th>Status</th>
+                  <th>Numéro Pers</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-              {personnelData && Array.isArray(personnelData) && personnelData.length > 0 ? (
+                {personnelData && Array.isArray(personnelData) && personnelData.length > 0 ? (
                   personnelData.map((item) => (
-                  <tr key={item.id_personnel}>
-                    <td>{item.id_personnel}</td>
-                    <td>{item.nom_personnel}</td>
-                    <td>{item.prenom}</td>
-                    <td>{item.numero_personnel}</td>
-                  </tr>
+                    <tr key={item.id_personnel}>
+                      <td>{item.id_personnel}</td>
+                      <td>{item.nom_personnel}</td>
+                      <td>{item.prenom}</td>
+                      <td>{item.profil.nom_profil}</td>
+                      <td style={{textAlign:'right'}}>{item.numero_personnel}</td>
+                      <td>
+                        <button className="edit-btn" onClick={() => handleEditPersonnel(item)}>
+                          <EditIcon />
+                        </button>
+                        <button className="delete-btn" onClick={() => handleDeletePersonnel(item.id_personnel)}>
+                          <DeleteIcon />
+                        </button>
+                      </td>
+                    </tr>
                   ))
                 ) : (
                   <p>Aucun Personnel disponible</p>
@@ -84,7 +166,46 @@ const PeoplePage = () => {
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Modale pour la mise à jour du personnel */}
+    
+    <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} contentLabel="Modifier Personnel" >
+    <div className='mdpFrgt'>
+        <h2 className='modal_title'>Modification {selectedPersonnel?.id_personnel}</h2>
+        {selectedPersonnel && (
+          <>
+            <label>Adresse : </label>
+            <input
+              type="text"
+              value={selectedPersonnel.adresse.latitude}
+              onChange={(e) => setSelectedPersonnel({ ...selectedPersonnel, adresse: { ...selectedPersonnel.adresse, latitude: parseFloat(e.target.value) } })} // Changement ici
+            />
+            <input
+              type="text"
+              value={selectedPersonnel.adresse.longitude}
+              onChange={(e) => setSelectedPersonnel({ ...selectedPersonnel, adresse: { ...selectedPersonnel.adresse, longitude: parseFloat(e.target.value) } })} // Changement ici
+            />
+            <label>Numéro de telephone : </label>
+            <input
+              type="text"
+              value={selectedPersonnel.numero_personnel}
+              onChange={(e) => setSelectedPersonnel({ ...selectedPersonnel, numero_personnel: e.target.value })}
+            />
+            <br></br>
+            <label>Mot de passe, oublié ?</label>
+            <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)}/>  
+            <p>Confirmez votre mot de passe</p>
+            <input type="password" placeholder="Confirmez votre mot de passe" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
+            <button onClick={() => handleUpdateMdpPersonnel(selectedPersonnel.id_personnel)} className='update-btn'>Mettre à jour</button>
+            <br></br>
+            <button onClick={handleUpdatePersonnel} className='update-btn'>Mettre à jour</button>
+            <button onClick={() => setIsModalOpen(false)} className='cancel-btn'>Annuler</button>
+          </>
+        )}
+        </div>
+      </Modal>
+      </div>
+    
   );
 };
 

@@ -1,4 +1,5 @@
 import { Arret } from "./Arret";
+import { Profil } from "./Profil";
 
 export  interface Personnel {
     id_personnel: string;   
@@ -8,4 +9,5 @@ export  interface Personnel {
     email: string;
     mdp: string;
     adresse:Arret ; 
+    profil:Profil;
 }

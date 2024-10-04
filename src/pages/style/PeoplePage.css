@@ -142,3 +142,41 @@
     width: 90%;
     max-width: 500px;
   }
+  .modal_title{
+    font-family: 'Poppins';
+  }
+  .model{
+    background-color: yellow;
+  }
+  .update-btn{
+    background-color: rgb(35, 166, 207);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-family: Poppins;
+  }
+  .cancel-btn{
+    background-color: rgb(207, 44, 35);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    margin-left: 10px;
+    margin-bottom: 20px;
+    font-family: Poppins;
+  }
+  .mdpFrgt{
+    font-family: 'Poppins';
+    max-width: 500px;
+
+  }
+  .mdpFrgt label{
+    font-size: 15px;
+  }
+

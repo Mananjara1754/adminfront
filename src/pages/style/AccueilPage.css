@@ -49,4 +49,12 @@
       width: 100%;
     }
   }
+  .edit-btn{
+    border: none;
+    background-color: transparent;
+  }
+  .delete-btn{
+    border: none;
+    background-color: transparent;
+  }
   
