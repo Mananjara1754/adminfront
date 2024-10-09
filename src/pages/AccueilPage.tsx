@@ -94,12 +94,13 @@ const AccueilPage = () => {
                   {busData && Array.isArray(busData) && busData.length > 0 ? (
                   busData.map((item) => (
                     <BusCard
-                id_bus={'Pers 1'}
-                nom_chauffeur={item.chauffeur.nom_personnel}
-                prenom_chauffeur={item.chauffeur.prenom}
-                numero_matricule={item.immatricule}
-                nb_place={item.nb_place}
-                action={handleClick}/>
+                      id_bus={item.id_voiture}
+                      nom_chauffeur={item.chauffeur.nom_personnel}
+                      prenom_chauffeur={item.chauffeur.prenom}
+                      numero_matricule={item.immatricule}
+                      nb_place={item.nb_place}
+                      action={handleClick}
+                    />
                   ))
                 ) : (
                   <p>Aucun bus disponible</p>
