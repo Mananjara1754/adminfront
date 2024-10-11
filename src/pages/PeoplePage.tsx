@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import './style/PeoplePage.css';
 import Menu from '../components/Menu';
-import { FaTrash, FaEdit, FaPlus } from 'react-icons/fa';
 import axios from 'axios';
 import { Personnel } from '../dto/Personnel';
 import Modal from 'react-modal';
@@ -9,8 +8,15 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import './style/Spinner.css'; 
+import {getProfilData} from '../services/ProfilService';
+import { Profil } from '../dto/Profil';
+import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 
 const PeoplePage = () => {
+  const API_KEY = 'AIzaSyB6N9xqAJMsoNw93ROY1sQhrJylwc4kSXk';
+const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [personnelData, setPersonnelData] = useState<Personnel[]>([]);  
@@ -18,6 +24,23 @@ const PeoplePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [profilData,setProfilData] = useState<Profil[]>([]);
+  const [profil,setProfil] = useState<any>(null);
+  const [latitude, setLatitude] = useState(ANTANANARIVO.lat);
+  const [longitude, setLongitude] = useState(ANTANANARIVO.lng);
+
+  const [nom_personnel, setNom_personnel] = useState(''); // Ajout de la variable nom_personnel
+  const [prenom, setPrenom] = useState(''); // Ajout de la variable prenom
+  const [numero_personnel, setNumero_personnel] = useState(''); // Ajout de la variable numero_personnel
+  const [email, setEmail] = useState(''); // Ajout de la variable email
+  const [mdp, setMdp] = useState(''); // Ajout de la variable mdp
+  const [confMdp, setConfMdp] = useState('');
+  const [loadingInsertion,setLoadingInsertion] = useState(false); 
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: API_KEY,
+  });
+
   async function getPersonnelData() {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/listePeople`, {
@@ -30,10 +53,17 @@ const PeoplePage = () => {
       console.error('Erreur lors de l\'appel à l\'API : ', error);
     }
   }
+  const fetchData = async () => {
+    const data = await getProfilData();
+    setProfilData(data);
+  };
 
   useEffect(() => { 
     getPersonnelData();
+    fetchData();
   }, []);
+
+
 
   // Fonction pour supprimer un personnel
   const handleDeletePersonnel = async (id: string) => {
@@ -115,6 +145,53 @@ const PeoplePage = () => {
       setIsLoading(false);
     }
   };
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+  const handleMapClick_arrive = (event: google.maps.MapMouseEvent) => {
+    if (event.latLng) {
+      const lat = event.latLng.lat();
+      const lng = event.latLng.lng();
+      console.log(`Clicked location: ${lat}, ${lng}`);
+      setLatitude(lat);
+      setLongitude(lng); 
+    }
+  };
+
+  const creactionPersonnel = async(event: React.FormEvent) => {
+    event.preventDefault();
+    setLoadingInsertion(true);
+    if(mdp != confMdp){
+      setLoadingInsertion(false);
+      toast.error('Erreur lors de la confirmation du mot de passe');
+    }else{
+      try {
+        await axios.post(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/creationPersonnel`,{
+          nom_personnel:nom_personnel,
+          prenom:prenom,
+          numero_personnel:numero_personnel,
+          profil:profil,
+          email:email,
+          mdp:mdp,
+          adresse:{
+            latitude:latitude,
+            longitude:longitude
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          }
+        });
+        toast.success('Personnels  ajoutés avec succès !');
+        setShowModal(false);
+      } catch (error) {
+        toast.error("Erreur lors de l'ajout du personnel");
+      } finally {
+        setLoadingInsertion(false);
+      }
+    }
+
+  };
+
 
   return (
     <div className="app">
@@ -124,10 +201,17 @@ const PeoplePage = () => {
         <div className="container">
           <h1>Liste des personnes</h1>
           <button className="add-bus-btn" onClick={handleAddAllPerson} disabled={isLoading}>
-            {isLoading ? <div className="spinner"></div> : 'Ajouter tous les personnes'}
+            {isLoading ? <div className="spinner"></div> : 'Ajouter dans Keycloak'}
           </button>
           {error && <p className="error-message" style={{color:'orangered',textAlign:'center'}}>{error}</p>}
+          
           <div className="liste-bus-container">
+            <div className='inscriptionContainer'>
+              <p className='inscriptionTitle'>Inscrire un nouveau personnel  </p>
+              <button className="add-people" onClick={()=>{setShowModal(true)}}>
+              <AddIcon />
+          </button>
+            </div>
             <table className="bus-table">
               <thead>
                 <tr>
@@ -204,6 +288,110 @@ const PeoplePage = () => {
         )}
         </div>
       </Modal>
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Ajouter un personnel</h5>
+              <button className="close-button" onClick={handleCloseModal}>
+                &times;
+              </button>
+            </div>
+            <div className="modal-body">
+              <form onSubmit={creactionPersonnel}>
+                <div className="form-group" >
+                  <label className="form-label">Profil</label>
+                  <select
+                    className='custom-select'
+                    value={profil ? profil.nom_profil : ''} // Changement ici
+                    onChange={(e) => {
+                      const selectedProfil = profilData.find(p => p.nom_profil === e.target.value); // Changement ici
+                      setProfil(selectedProfil); // Changement ici
+                    }}
+                  >
+                    <option value="">Sélectionnez un Profil</option>
+                    {profilData.map((profil) => (
+                      <option key={profil.nom_profil} value={profil.nom_profil}>
+                        {profil.nom_profil}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Nom"
+                    value={nom_personnel}
+                    onChange={(e) => setNom_personnel(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Prenom"
+                    value={prenom}
+                    onChange={(e) => setPrenom(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Tel"
+                    value={numero_personnel}
+                    onChange={(e) => setNumero_personnel(e.target.value)}
+                  />
+                  <div>
+                    <p className='inputTitle'>Choisissez un emplacement sur la carte pour le point de arrive:</p>
+                    {isLoaded ? (
+                      <GoogleMap
+                        mapContainerStyle={{ height: '400px', width: '100%' }}
+                        center={ANTANANARIVO}
+                        zoom={13}
+                        onClick={handleMapClick_arrive}
+                      >
+                        <Marker position={{ lat: latitude, lng: longitude }} />
+                        {/* <Marker position={{ lat: -18.8792, lng: 47.5079 }} /> */}
+                      </GoogleMap>
+                    ) : (
+                      <p>Chargement de la carte...</p>
+                    )}
+                  </div>
+                  <label className='inputTitle'>Latitude de arrive</label>
+                  <input
+                    type="number"
+                    placeholder="Nom d'arrêt"
+                    value={latitude}
+                    onChange={(e) => setLatitude(Number(e.target.value))}
+                  />
+                  <label className='inputTitle'>Longitude de arrive</label>
+                  <input
+                    type="number"
+                    placeholder="Nom d'arrêt"
+                    value={longitude}
+                    onChange={(e) => setLongitude(Number(e.target.value))}
+                  />
+                  
+                  <input
+                    type="email"
+                    placeholder="E-mail"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Mot de passe"
+                    value={mdp}
+                    onChange={(e) => setMdp(e.target.value)}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Confirmation du mot de passe"
+                    value={confMdp}
+                    onChange={(e) => setConfMdp(e.target.value)}
+                  />
+                </div>
+                <button className="add-bus-btn" type="submit" disabled={loadingInsertion}>
+                  {loadingInsertion ? <div className="spinner"></div> : 'Enregistrer'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     
   );

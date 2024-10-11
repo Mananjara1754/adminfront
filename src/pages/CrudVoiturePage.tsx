@@ -9,7 +9,8 @@ import { Chauffeur } from '../dto/Chauffeur';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './style/Spinner.css';
-
+import { getBusData } from '../services/BusService';
+import { getChauffeurData } from '../services/PeopleService';
 
 const API_KEY = 'AIzaSyB6N9xqAJMsoNw93ROY1sQhrJylwc4kSXk';
 const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
@@ -34,43 +35,18 @@ const CrudVoiturePage = () => {
     googleMapsApiKey: API_KEY,
   });
 
-  async function getBusData() {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/listeVehicule`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (response.data && Array.isArray(response.data.data)) {
-        setBusData(response.data.data);
-      } else {
-        console.error('Les données reçues ne sont pas sous forme de tableau.');
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'appel à l\'API : ', error);
-    }
+  const fectchDataBus = async () =>{
+    const data = await getBusData();
+    setBusData(data);
   }
-  async function getChauffeurData() {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/listeChauffeur`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (response.data && Array.isArray(response.data.data)) {
-        console.log(response.data)
-        setChauffeurData(response.data.data);
-      } else {
-        console.error('Les données reçues ne sont pas sous forme de tableau.');
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'appel à l\'API : ', error);
-    }
-  }
-
+  const fetchData = async () => {
+    await fectchDataBus();
+    const chauff = await getChauffeurData();
+    setChauffeurData(chauff);
+  };
+  
   useEffect(() => {
-    getBusData();
-    getChauffeurData();
+    fetchData();
   }, []);
 
   // Fonction de gestion du clic sur la carte
@@ -122,29 +98,27 @@ const CrudVoiturePage = () => {
       setLoadingCreate(true);
       setAddButton(false);
       toast.success('Voiture cree avec succès');
-      await getBusData();
+      fectchDataBus();
 
     } catch (error) {
       console.error('Erreur lors de la creation du voiture : ', error);
       toast.error('Erreur lors de la creation du voiture');
     }
   };
-  const [selectedBus, setSelectedBus] = useState<Bus | null>(null); // Bus sélectionné pour modification
-  const [showModal, setShowModal] = useState(false); // État de la popup
+  const [selectedBus, setSelectedBus] = useState<Bus | null>(null);
+  const [showModal, setShowModal] = useState(false);
   const handleEditClick = (bus: Bus) => {
-    setSelectedBus(bus); // Définir le bus sélectionné
-    setChauffeurId(bus.chauffeur ? bus.chauffeur.id_personnel : ''); // Prendre l'ID du chauffeur actuel
-    setShowModal(true); // Afficher la popup
+    setSelectedBus(bus);
+    setChauffeurId(bus.chauffeur ? bus.chauffeur.id_personnel : '');
+    setShowModal(true);
   };
 
-  // Cacher la popup
   const handleCloseModal = () => {
     setShowModal(false);
   };
   const handleSubmit = async(event: React.FormEvent) => {
     event.preventDefault();
     if (selectedBus) {
-      // Afficher l'ID de la voiture et le chauffeur choisi
       console.log('ID du Bus :', selectedBus.id_voiture);
       console.log('ID du chauffeur :', chauffeurId);
 
@@ -157,7 +131,7 @@ const CrudVoiturePage = () => {
       })
       .then(() => {
         toast.success('Voiture modifiée avec succès');
-        getBusData();
+        fectchDataBus();
         setShowModal(false);
       }).catch(error => {
         toast.error('Erreur lors de la modification');

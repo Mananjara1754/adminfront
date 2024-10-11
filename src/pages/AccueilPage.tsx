@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Bus } from '../dto/Bus';
 import { toast, ToastContainer } from 'react-toastify';
+import { getBusData } from '../services/BusService';
 import 'react-toastify/dist/ReactToastify.css'
 const AccueilPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,24 +24,12 @@ const AccueilPage = () => {
     setSelectedDate(event.target.value);
   };
 
-  async function getBusData() {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/listeVehicule`,{
-        headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}` // Afficher le token dans les en-têtes à partir de localStorage
-      }});
-      console.log("Réponse API : ", response.data); 
-      if (response.data && Array.isArray(response.data.data)) {
-        setBusData(response.data.data); 
-      } else {
-        console.error("Les données reçues ne sont pas sous forme de tableau.");
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'appel à l'API : ", error);
-    }
-  }
+  const fetchData = async () => {
+    const data = await getBusData();
+    setBusData(data);
+  };
     useEffect(() => { 
-      getBusData();
+      fetchData();
     },[]);
     
     const handleClick = () => {
