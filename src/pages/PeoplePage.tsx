@@ -13,6 +13,7 @@ import './style/Spinner.css';
 import {getProfilData} from '../services/ProfilService';
 import { Profil } from '../dto/Profil';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { background } from '@chakra-ui/react';
 
 const PeoplePage = () => {
   const API_KEY = 'AIzaSyB6N9xqAJMsoNw93ROY1sQhrJylwc4kSXk';
@@ -84,21 +85,26 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
     }
   };
   const handleUpdateMdpPersonnel = async (id_personnel:string) => {
-    try {
-      await axios.post(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/modifMdp`, {
-        id_personnel:id_personnel,
-        mdp:password,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        }
-      });
-      toast.success('Mot de passe modifié avec succès');
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error('Erreur lors de la modififaction du mot de passe du personnel : ', error);
-      toast.error('Erreur lors de la modififaction du mot de passe du personnel');
+    if(password == confirmPassword){
+      try {
+        await axios.post(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/modifMdp`, {
+          id_personnel:id_personnel,
+          mdp:password,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          }
+        });
+        toast.success('Mot de passe modifié avec succès');
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error('Erreur lors de la modififaction du mot de passe du personnel : ', error);
+        toast.error('Erreur lors de la modififaction du mot de passe du personnel');
+      }
+    }else{
+      toast.error('Les mots de passe ne correspondent pas');
     }
   };
+  
 
   // Ouvrir la modale pour modifier le personnel
   const handleEditPersonnel = (personnel: Personnel) => {
@@ -158,6 +164,7 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
     }
   };
 
+  
   const creactionPersonnel = async(event: React.FormEvent) => {
     event.preventDefault();
     setLoadingInsertion(true);
@@ -181,6 +188,8 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           }
         });
+        getPersonnelData();
+        handleAddAllPerson();
         toast.success('Personnels  ajoutés avec succès !');
         setShowModal(false);
       } catch (error) {
@@ -251,43 +260,94 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
         </div>
       </div>
 
-      {/* Modale pour la mise à jour du personnel */}
+      {/*   Modale pour la mise à jour du personnel   */}
     
-    <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} contentLabel="Modifier Personnel" >
+      <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} contentLabel="Modifier Personnel">
+  <div className="containerModif">
+    <div className='mdpMap'>
+      <p className='inputTitle'>Choisissez un emplacement sur la carte pour le point de arrive:</p>
+      {isLoaded && selectedPersonnel ? (
+        <GoogleMap
+          mapContainerStyle={{ height: '500px', width: '100%' }}
+          center={ANTANANARIVO}
+          zoom={13}
+          onClick={(event: google.maps.MapMouseEvent) => {
+            if (event.latLng) {
+              const lat = event.latLng.lat();
+              const lng = event.latLng.lng();
+              console.log(`Clicked location: ${lat}, ${lng}`);
+              // Met à jour les coordonnées en un seul appel
+              if(selectedPersonnel){  
+                setSelectedPersonnel({
+                  ...selectedPersonnel,
+                  adresse: {
+                    ...selectedPersonnel.adresse,
+                    latitude: lat,
+                    longitude: lng
+                  }
+                });
+              } 
+            }
+          }}
+        >
+          <Marker position={{ lat: selectedPersonnel.adresse.latitude, lng: selectedPersonnel.adresse.longitude }} />
+        </GoogleMap>
+      ) : (
+        <p>Chargement de la carte...</p>
+      )}
+    </div>
     <div className='mdpFrgt'>
-        <h2 className='modal_title'>Modification {selectedPersonnel?.id_personnel}</h2>
-        {selectedPersonnel && (
-          <>
-            <label>Adresse : </label>
-            <input
-              type="text"
-              value={selectedPersonnel.adresse.latitude}
-              onChange={(e) => setSelectedPersonnel({ ...selectedPersonnel, adresse: { ...selectedPersonnel.adresse, latitude: parseFloat(e.target.value) } })} // Changement ici
-            />
-            <input
-              type="text"
-              value={selectedPersonnel.adresse.longitude}
-              onChange={(e) => setSelectedPersonnel({ ...selectedPersonnel, adresse: { ...selectedPersonnel.adresse, longitude: parseFloat(e.target.value) } })} // Changement ici
-            />
-            <label>Numéro de telephone : </label>
-            <input
-              type="text"
-              value={selectedPersonnel.numero_personnel}
-              onChange={(e) => setSelectedPersonnel({ ...selectedPersonnel, numero_personnel: e.target.value })}
-            />
-            <br></br>
-            <label>Mot de passe, oublié ?</label>
-            <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)}/>  
-            <p>Confirmez votre mot de passe</p>
-            <input type="password" placeholder="Confirmez votre mot de passe" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
-            <button onClick={() => handleUpdateMdpPersonnel(selectedPersonnel.id_personnel)} className='update-btn'>Mettre à jour</button>
-            <br></br>
-            <button onClick={handleUpdatePersonnel} className='update-btn'>Mettre à jour</button>
-            <button onClick={() => setIsModalOpen(false)} className='cancel-btn'>Annuler</button>
-          </>
-        )}
-        </div>
-      </Modal>
+      <h2 className='modal_title'>Modification {selectedPersonnel?.id_personnel}</h2>
+      {selectedPersonnel && (
+        <>
+          <label>Adresse : </label>
+          <input
+            type="text"
+            value={selectedPersonnel.adresse.latitude}
+            onChange={(e) => setSelectedPersonnel({
+              ...selectedPersonnel,
+              adresse: {
+                ...selectedPersonnel.adresse,
+                latitude: parseFloat(e.target.value)
+              }
+            })}
+          />
+          <input
+            type="text"
+            value={selectedPersonnel.adresse.longitude}
+            onChange={(e) => setSelectedPersonnel({
+              ...selectedPersonnel,
+              adresse: {
+                ...selectedPersonnel.adresse,
+                longitude: parseFloat(e.target.value)
+              }
+            })}
+          />
+          <label>Numéro de telephone : </label>
+          <input
+            type="text"
+            value={selectedPersonnel.numero_personnel}
+            onChange={(e) => setSelectedPersonnel({
+              ...selectedPersonnel,
+              numero_personnel: e.target.value
+            })}
+          />
+          <br></br>
+          <label>Mot de passe, oublié ?</label>
+          <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <p>Confirmez votre mot de passe</p>
+          <input type="password" placeholder="Confirmez votre mot de passe" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+          <button disabled={!password || !confirmPassword} onClick={() => handleUpdateMdpPersonnel(selectedPersonnel.id_personnel)} className={(!password || !confirmPassword)?'update-btn-disable':'update-btn'} >Mettre à jour</button>
+          <br></br>
+          <button onClick={handleUpdatePersonnel} className='update-btn'>Mettre à jour</button>
+          <button onClick={() => setIsModalOpen(false)} className='cancel-btn'>Annuler</button>
+        </>
+      )}
+    </div>
+  </div>
+</Modal>
+
+
       {showModal && (
         <div className="modal">
           <div className="modal-content">
@@ -392,6 +452,7 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
           </div>
         </div>
       )}
+
       </div>
     
   );
