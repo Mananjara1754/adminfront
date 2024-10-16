@@ -8,6 +8,9 @@ import PeopleIcon from '@mui/icons-material/People';
 import './style/Menu.css';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import { clearBusCache } from '../services/BusService';
+import { clearChauffeurCache} from '../services/PeopleService';
+import { clear } from 'console';
 
 function Menu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +20,8 @@ function Menu() {
   };
   const deconnexion = () => {
     localStorage.removeItem('token');
+    clearBusCache();
+    clearChauffeurCache();
     navigate('/');
   };
 

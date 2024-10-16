@@ -13,12 +13,13 @@ import './style/Spinner.css';
 import {getProfilData} from '../services/ProfilService';
 import { Profil } from '../dto/Profil';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
-import { background } from '@chakra-ui/react';
+import { clearChauffeurCache} from '../services/PeopleService';
 
 const PeoplePage = () => {
   const API_KEY = 'AIzaSyB6N9xqAJMsoNw93ROY1sQhrJylwc4kSXk';
-const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
+  const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
   const [isLoading, setIsLoading] = useState(false);
+  const [isPaginer,setIsPaginer] = useState(false);
   const [error, setError] = useState('');
   const [personnelData, setPersonnelData] = useState<Personnel[]>([]);  
   const [selectedPersonnel, setSelectedPersonnel] = useState<Personnel | null>(null);
@@ -41,32 +42,54 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: API_KEY,
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5); // Tu peux ajuster la taille de la page ici
+  const [totalPages, setTotalPages] = useState(1); // Gère le nombre total de pages
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   async function getPersonnelData() {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/listePeople`, {
+      setIsPaginer(true);
+      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/personnelPagination`, {
+        params: {
+          page: currentPage , // Page dans l'API commence souvent à 0
+          size: pageSize
+        },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      setPersonnelData(response.data);
+  
+      setPersonnelData(response.data.data[0]); // Met à jour les données du personnel
+      
+      const totalPages = Math.ceil(response.data.data[1] / pageSize);
+      setTotalPages(totalPages);
     } catch (error) {
-      console.error('Erreur lors de l\'appel à l\'API : ', error);
+      console.error("Erreur lors de l'appel à l'API pour la pagination : ", error);
+    }finally{
+      setIsPaginer(false);
     }
   }
+  
   const fetchData = async () => {
     const data = await getProfilData();
     setProfilData(data);
   };
 
   useEffect(() => { 
-    getPersonnelData();
+    //getPersonnelData();
     fetchData();
   }, []);
 
+  useEffect(()=>{
+    getPersonnelData();
+  },[currentPage, pageSize])
 
 
-  // Fonction pour supprimer un personnel
   const handleDeletePersonnel = async (id: string) => {
     try {
       await axios.delete(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/supprimerPersonnel`, {
@@ -106,7 +129,6 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
   };
   
 
-  // Ouvrir la modale pour modifier le personnel
   const handleEditPersonnel = (personnel: Personnel) => {
     setSelectedPersonnel(personnel);
     setIsModalOpen(true);
@@ -127,6 +149,7 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
         const updatedPersonnelList = personnelData.map((personnel) =>
           personnel.id_personnel === selectedPersonnel.id_personnel ? selectedPersonnel : personnel
         );
+        clearChauffeurCache();
         setPersonnelData(updatedPersonnelList);
         toast.success('Personnel mis à jour avec succès');
         setIsModalOpen(false);
@@ -256,6 +279,40 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
                 )}
               </tbody>
             </table>
+            {/* Pagination */}
+            <p style={{textAlign:'center'}}>{isPaginer ? <div className="spinner"></div> : <br></br>}</p>
+            <div className="pagination">
+              {/* Bouton Précédent */}
+              
+              <button 
+                onClick={() => handlePageChange(currentPage - 1)} 
+                disabled={currentPage === 0}
+                className={currentPage === 0 ? 'disabled' : ''}
+              >
+                Précédent
+              </button>
+
+              {/* Boutons numérotés */}
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(index)}
+                  className={currentPage === index ? 'active' : ''}
+                >
+                  {index + 1}
+                </button>
+              ))}
+
+              {/* Bouton Suivant */}
+              <button 
+                onClick={() => handlePageChange(currentPage + 1)} 
+                disabled={currentPage === totalPages - 1}
+                className={currentPage === totalPages - 1 ? 'disabled' : ''}
+              >
+                Suivant
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -263,89 +320,89 @@ const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
       {/*   Modale pour la mise à jour du personnel   */}
     
       <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} contentLabel="Modifier Personnel">
-  <div className="containerModif">
-    <div className='mdpMap'>
-      <p className='inputTitle'>Choisissez un emplacement sur la carte pour le point de arrive:</p>
-      {isLoaded && selectedPersonnel ? (
-        <GoogleMap
-          mapContainerStyle={{ height: '500px', width: '100%' }}
-          center={ANTANANARIVO}
-          zoom={13}
-          onClick={(event: google.maps.MapMouseEvent) => {
-            if (event.latLng) {
-              const lat = event.latLng.lat();
-              const lng = event.latLng.lng();
-              console.log(`Clicked location: ${lat}, ${lng}`);
-              // Met à jour les coordonnées en un seul appel
-              if(selectedPersonnel){  
-                setSelectedPersonnel({
-                  ...selectedPersonnel,
-                  adresse: {
-                    ...selectedPersonnel.adresse,
-                    latitude: lat,
-                    longitude: lng
+        <div className="containerModif">
+          <div className='mdpMap'>
+            <p className='inputTitle'>Choisissez un emplacement sur la carte pour le point de arrive:</p>
+            {isLoaded && selectedPersonnel ? (
+              <GoogleMap
+                mapContainerStyle={{ height: '500px', width: '100%' }}
+                center={ANTANANARIVO}
+                zoom={13}
+                onClick={(event: google.maps.MapMouseEvent) => {
+                  if (event.latLng) {
+                    const lat = event.latLng.lat();
+                    const lng = event.latLng.lng();
+                    console.log(`Clicked location: ${lat}, ${lng}`);
+                    // Met à jour les coordonnées en un seul appel
+                    if(selectedPersonnel){  
+                      setSelectedPersonnel({
+                        ...selectedPersonnel,
+                        adresse: {
+                          ...selectedPersonnel.adresse,
+                          latitude: lat,
+                          longitude: lng
+                        }
+                      });
+                    } 
                   }
-                });
-              } 
-            }
-          }}
-        >
-          <Marker position={{ lat: selectedPersonnel.adresse.latitude, lng: selectedPersonnel.adresse.longitude }} />
-        </GoogleMap>
-      ) : (
-        <p>Chargement de la carte...</p>
-      )}
-    </div>
-    <div className='mdpFrgt'>
-      <h2 className='modal_title'>Modification {selectedPersonnel?.id_personnel}</h2>
-      {selectedPersonnel && (
-        <>
-          <label>Adresse : </label>
-          <input
-            type="text"
-            value={selectedPersonnel.adresse.latitude}
-            onChange={(e) => setSelectedPersonnel({
-              ...selectedPersonnel,
-              adresse: {
-                ...selectedPersonnel.adresse,
-                latitude: parseFloat(e.target.value)
-              }
-            })}
-          />
-          <input
-            type="text"
-            value={selectedPersonnel.adresse.longitude}
-            onChange={(e) => setSelectedPersonnel({
-              ...selectedPersonnel,
-              adresse: {
-                ...selectedPersonnel.adresse,
-                longitude: parseFloat(e.target.value)
-              }
-            })}
-          />
-          <label>Numéro de telephone : </label>
-          <input
-            type="text"
-            value={selectedPersonnel.numero_personnel}
-            onChange={(e) => setSelectedPersonnel({
-              ...selectedPersonnel,
-              numero_personnel: e.target.value
-            })}
-          />
-          <br></br>
-          <label>Mot de passe, oublié ?</label>
-          <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <p>Confirmez votre mot de passe</p>
-          <input type="password" placeholder="Confirmez votre mot de passe" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-          <button disabled={!password || !confirmPassword} onClick={() => handleUpdateMdpPersonnel(selectedPersonnel.id_personnel)} className={(!password || !confirmPassword)?'update-btn-disable':'update-btn'} >Mettre à jour</button>
-          <br></br>
-          <button onClick={handleUpdatePersonnel} className='update-btn'>Mettre à jour</button>
-          <button onClick={() => setIsModalOpen(false)} className='cancel-btn'>Annuler</button>
-        </>
-      )}
-    </div>
-  </div>
-</Modal>
+                }}
+              >
+                <Marker position={{ lat: selectedPersonnel.adresse.latitude, lng: selectedPersonnel.adresse.longitude }} />
+              </GoogleMap>
+            ) : (
+              <p>Chargement de la carte...</p>
+            )}
+          </div>
+          <div className='mdpFrgt'>
+            <h2 className='modal_title'>Modification {selectedPersonnel?.id_personnel}</h2>
+            {selectedPersonnel && (
+              <>
+                <label>Adresse : </label>
+                <input
+                  type="text"
+                  value={selectedPersonnel.adresse.latitude}
+                  onChange={(e) => setSelectedPersonnel({
+                    ...selectedPersonnel,
+                    adresse: {
+                      ...selectedPersonnel.adresse,
+                      latitude: parseFloat(e.target.value)
+                    }
+                  })}
+                />
+                <input
+                  type="text"
+                  value={selectedPersonnel.adresse.longitude}
+                  onChange={(e) => setSelectedPersonnel({
+                    ...selectedPersonnel,
+                    adresse: {
+                      ...selectedPersonnel.adresse,
+                      longitude: parseFloat(e.target.value)
+                    }
+                  })}
+                />
+                <label>Numéro de telephone : </label>
+                <input
+                  type="text"
+                  value={selectedPersonnel.numero_personnel}
+                  onChange={(e) => setSelectedPersonnel({
+                    ...selectedPersonnel,
+                    numero_personnel: e.target.value
+                  })}
+                />
+                <br></br>
+                <label>Mot de passe, oublié ?</label>
+                <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <p>Confirmez votre mot de passe</p>
+                <input type="password" placeholder="Confirmez votre mot de passe" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                <button disabled={!password || !confirmPassword} onClick={() => handleUpdateMdpPersonnel(selectedPersonnel.id_personnel)} className={(!password || !confirmPassword)?'update-btn-disable':'update-btn'} >Mettre à jour</button>
+                <br></br>
+                <button onClick={handleUpdatePersonnel} className='update-btn'>Mettre à jour</button>
+                <button onClick={() => setIsModalOpen(false)} className='cancel-btn'>Annuler</button>
+              </>
+            )}
+          </div>
+        </div>
+      </Modal>
 
 
       {showModal && (

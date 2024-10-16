@@ -9,7 +9,7 @@ import { Chauffeur } from '../dto/Chauffeur';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './style/Spinner.css';
-import { getBusData } from '../services/BusService';
+import { clearBusCache, getBusData } from '../services/BusService';
 import { getChauffeurData } from '../services/PeopleService';
 
 const API_KEY = 'AIzaSyB6N9xqAJMsoNw93ROY1sQhrJylwc4kSXk';
@@ -131,6 +131,7 @@ const CrudVoiturePage = () => {
       })
       .then(() => {
         toast.success('Voiture modifiée avec succès');
+        clearBusCache();
         fectchDataBus();
         setShowModal(false);
       }).catch(error => {

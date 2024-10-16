@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './style/LoginPage.css';
 import Logo from '../assets/image/Logo.svg';
 import axios from 'axios'; // Import axios for API calls
 import './style/Spinner.css'; // Assurez-vous de créer ce fichier CSS
+import { clearBusCache } from '../services/BusService';
+import { clearChauffeurCache } from '../services/PeopleService';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -39,6 +41,10 @@ function LoginPage() {
       setIsLoading(false);
     }
   }
+  useEffect(() => { 
+    clearBusCache();
+    clearChauffeurCache();
+  },[]);
 
   return (
     <div className="login-container">
