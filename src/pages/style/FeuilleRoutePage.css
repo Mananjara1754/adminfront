@@ -53,8 +53,16 @@
   .bus-table {
     width: 100%;
     border-collapse: collapse;
-
   }
+
+  .buStop{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    
+  }
+  
 
   .bus-table th,
   .bus-table td {
@@ -125,4 +133,21 @@
   .bus-name{
     font-family: Poppins-Bold;
     color:rgb(35, 166, 207);
+  }
+  .indication{
+    font-family: Poppins-Bold;
+  }
+  .indicationContainer{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+  }
+  .icone-sun{
+    color: orange;
+    font-size: 25px;
+  }
+  .icone-moon{
+    color: rgb(35, 166, 207);
+    font-size: 20px;
   }

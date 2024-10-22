@@ -8,17 +8,13 @@ import { Bus } from '../dto/Bus';
 import { toast, ToastContainer } from 'react-toastify';
 import { getBusData } from '../services/BusService';
 import 'react-toastify/dist/ReactToastify.css'
+import { getTomorrowDate } from '../services/DateService';
+
 const AccueilPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [busData, setBusData] = useState<Bus[]>([]);  
   const [selectedDate, setSelectedDate] = useState<string>(getTomorrowDate());
-
-  function getTomorrowDate(): string {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0]; // Format YYYY-MM-DD
-  }
 
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(event.target.value);
@@ -32,9 +28,8 @@ const AccueilPage = () => {
       fetchData();
     },[]);
     
-    const handleClick = () => {
-        navigate('/feuilleRoute'); 
-        console.log("click");
+    const handleClick = (id_voiture:String) => {
+      navigate(`/feuilleRoute/${id_voiture}`);
     };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -88,8 +83,9 @@ const AccueilPage = () => {
                       prenom_chauffeur={item.chauffeur.prenom}
                       numero_matricule={item.immatricule}
                       nb_place={item.nb_place}
-                      action={handleClick}
+                      action={()=>{handleClick(item.id_voiture)}}
                     />
+                    
                   ))
                 ) : (
                   <p>Aucun bus disponible</p>
