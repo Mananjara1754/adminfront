@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getTomorrowDate } from "../services/DateService";
 import { Trajet } from "../dto/Trajet";
-import { getTrajet } from "../services/TrajetService";
+import { getTrajet, getTrajetParDate } from "../services/TrajetService";
 import { FaMoon } from "react-icons/fa";
 import BusStopView from "../components/BusStopView";
 
@@ -27,25 +27,18 @@ const FeuilleRoutePage = ()=>{
   const destName1 = "Départ";
   const destName2 = "Etech";
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    // event.preventDefault(); // Empêche le rechargement de la page
-    // setIsLoading(true);
-    // try {
-    //   const response = await axios.get(`http://localhost:8087/reservationPeriodique`, {
-    //     params: {
-    //       dateCourse: selectedDate // Utilisation de selectedDate comme valeur du paramètre
-    //     },
-    //     headers: {
-    //       Authorization: `Bearer ${localStorage.getItem('token')}`,
-    //     }
-    //   });
-    //   setIsLoading(false);
-    //   toast.success('Réservation réussie'); // Correction de l'orthographe
-    // } catch (error) {
-    //   setIsLoading(false);
-    //   console.error('Erreur lors de la réservation : ', error);
-    //   toast.error('Erreur lors de la réservation');
-    // }
+    event.preventDefault();
+    setIsLoading(true);
+    if(id_voiture){
+      console.log(selectedDate)
+      const matin = await getTrajetParDate(selectedDate,id_voiture,0);
+      const soir = await getTrajetParDate(selectedDate,id_voiture,1);
+      setTrajetMatin(matin);
+      setTrajetSoir(soir);
+    }
+    setIsLoading(false);
   };
+
   useEffect(() => {
     const fetchData = async () => {
       if(id_voiture){

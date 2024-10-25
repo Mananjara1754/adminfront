@@ -98,6 +98,7 @@ const CrudVoiturePage = () => {
       setLoadingCreate(true);
       setAddButton(false);
       toast.success('Voiture cree avec succès');
+      clearBusCache();
       fectchDataBus();
 
     } catch (error) {

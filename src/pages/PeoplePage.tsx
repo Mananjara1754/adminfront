@@ -42,7 +42,7 @@ const PeoplePage = () => {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: API_KEY,
   });
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(5); // Tu peux ajuster la taille de la page ici
   const [totalPages, setTotalPages] = useState(1); // Gère le nombre total de pages
   const handlePageChange = (newPage: number) => {
@@ -211,6 +211,7 @@ const PeoplePage = () => {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           }
         });
+        clearChauffeurCache();
         getPersonnelData();
         handleAddAllPerson();
         toast.success('Personnels  ajoutés avec succès !');
