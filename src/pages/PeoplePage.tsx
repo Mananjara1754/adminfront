@@ -31,7 +31,6 @@ const PeoplePage = () => {
   const [profil,setProfil] = useState<any>(null);
   const [latitude, setLatitude] = useState(ANTANANARIVO.lat);
   const [longitude, setLongitude] = useState(ANTANANARIVO.lng);
-
   const [nom_personnel, setNom_personnel] = useState(''); // Ajout de la variable nom_personnel
   const [prenom, setPrenom] = useState(''); // Ajout de la variable prenom
   const [numero_personnel, setNumero_personnel] = useState(''); // Ajout de la variable numero_personnel

@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './style/Spinner.css';
 import { clearBusCache, getBusData } from '../services/BusService';
 import { getChauffeurData } from '../services/PeopleService';
-
+import {MarkerF} from '@react-google-maps/api'
 const API_KEY = 'AIzaSyB6N9xqAJMsoNw93ROY1sQhrJylwc4kSXk';
 const ANTANANARIVO = { lat: -18.8792, lng: 47.5079 };
 
@@ -30,26 +30,61 @@ const CrudVoiturePage = () => {
   const [chauffeurId,setChauffeurId] = useState('');
   const [chauffeurIdModif,setChauffeurIdModif] = useState('');
   const [loadingCreate, setLoadingCreate] = useState(false);
-  
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(5); // Tu peux ajuster la taille de la page ici
+  const [totalPages, setTotalPages] = useState(1);
+    const [isPaginer,setIsPaginer] = useState(false);
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: API_KEY,
   });
-
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
   const fectchDataBus = async () =>{
     const data = await getBusData();
     setBusData(data);
   }
+
   const fetchData = async () => {
-    await fectchDataBus();
     const chauff = await getChauffeurData();
     setChauffeurData(chauff);
   };
   
+
+
+  async function getVoitureData() {
+    try {
+      setIsPaginer(true);
+      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/voiturePagination`, {
+        params: {
+          page: currentPage , // Page dans l'API commence souvent à 0
+          size: pageSize
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+  
+      setBusData(response.data.data[0]); // Met à jour les données du personnel
+      
+      const totalPages = Math.ceil(response.data.data[1] / pageSize);
+      setTotalPages(totalPages);
+    } catch (error) {
+      console.error("Erreur lors de l'appel à l'API pour la pagination : ", error);
+    }finally{
+      setIsPaginer(false);
+    }
+  }
   useEffect(() => {
     fetchData();
-  }, []);
+  },[]);
 
-  // Fonction de gestion du clic sur la carte
+  useEffect(() => {
+    getVoitureData();
+  }, [currentPage, pageSize]);
+
   const handleMapClick_depart = (event: google.maps.MapMouseEvent) => {
     if (event.latLng) {
       const lat = event.latLng.lat();
@@ -197,7 +232,7 @@ const CrudVoiturePage = () => {
                       zoom={13}
                       onClick={handleMapClick_depart}
                     >
-                      <Marker position={{ lat: latitude_depart, lng: longitude_depart }} />
+                      <MarkerF position={{ lat: latitude_depart, lng: longitude_depart }} />
                       {/* <Marker position={{ lat: -18.8792, lng: 47.5079 }} /> */}
                     </GoogleMap>
                   ) : (
@@ -234,7 +269,7 @@ const CrudVoiturePage = () => {
                       zoom={13}
                       onClick={handleMapClick_arrive}
                     >
-                      <Marker position={{ lat: latitude_arrive, lng: longitude_arrive }} />
+                      <MarkerF position={{ lat: latitude_arrive, lng: longitude_arrive }} />
                       {/* <Marker position={{ lat: -18.8792, lng: 47.5079 }} /> */}
                     </GoogleMap>
                   ) : (
@@ -301,6 +336,39 @@ const CrudVoiturePage = () => {
                 )}
               </tbody>
             </table>
+              {/* Pagination */}
+              <p style={{textAlign:'center'}}>{isPaginer ? <div className="spinner"></div> : <br></br>}</p>
+                <div className="pagination">
+                  {/* Bouton Précédent */}
+                  
+                  <button 
+                    onClick={() => handlePageChange(currentPage - 1)} 
+                    disabled={currentPage === 0}
+                    className={currentPage === 0 ? 'disabled' : ''}
+                  >
+                    Précédent
+                  </button>
+
+                  {/* Boutons numérotés */}
+                  {Array.from({ length: totalPages }, (_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handlePageChange(index)}
+                      className={currentPage === index ? 'active' : ''}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  {/* Bouton Suivant */}
+                  <button 
+                    onClick={() => handlePageChange(currentPage + 1)} 
+                    disabled={currentPage === totalPages - 1}
+                    className={currentPage === totalPages - 1 ? 'disabled' : ''}
+                  >
+                    Suivant
+                  </button>
+                </div>
           </div>
         </div>
       </div>
