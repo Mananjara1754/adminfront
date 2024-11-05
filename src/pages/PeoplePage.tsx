@@ -14,6 +14,7 @@ import {getProfilData} from '../services/ProfilService';
 import { Profil } from '../dto/Profil';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { clearChauffeurCache} from '../services/PeopleService';
+import { Button } from '@mui/material';
 
 const PeoplePage = () => {
   const API_KEY = 'AIzaSyB6N9xqAJMsoNw93ROY1sQhrJylwc4kSXk';
@@ -37,6 +38,7 @@ const PeoplePage = () => {
   const [email, setEmail] = useState(''); // Ajout de la variable email
   const [mdp, setMdp] = useState(''); // Ajout de la variable mdp
   const [confMdp, setConfMdp] = useState('');
+  const [critere, setCritere] = useState<string>(''); // Ajout de la variable critere
   const [loadingInsertion,setLoadingInsertion] = useState(false); 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: API_KEY,
@@ -44,6 +46,7 @@ const PeoplePage = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(5); // Tu peux ajuster la taille de la page ici
   const [totalPages, setTotalPages] = useState(1); // Gère le nombre total de pages
+
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < totalPages) {
       setCurrentPage(newPage);
@@ -186,7 +189,23 @@ const PeoplePage = () => {
     }
   };
 
-  
+  const handleSearchPersonnel = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_BFF_ADMIN_URL}/people/rechercherPersonnel`, {
+        params: {
+          critere: critere,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      console.log(response.data.data);
+      setPersonnelData(response.data.data);
+    } catch (error) {
+      console.error('Erreur lors de la recherche des personnels : ', error);
+    }
+  };
+
   const creactionPersonnel = async(event: React.FormEvent) => {
     event.preventDefault();
     setLoadingInsertion(true);
@@ -238,6 +257,17 @@ const PeoplePage = () => {
           {error && <p className="error-message" style={{color:'orangered',textAlign:'center'}}>{error}</p>}
           
           <div className="liste-bus-container">
+          <div className="search-form" style={{width:'50%'}}>
+            <label htmlFor="critere" style={{fontFamily:'Poppins'}}>Recherche personnel :</label>
+            <input 
+      
+              type="text" 
+              className='' 
+              value={critere} 
+              onChange={(e) => setCritere(e.target.value)} // Mettre à jour l'état
+            />
+            <button className="add-bus-btn" style={{marginTop:0}} onClick={handleSearchPersonnel}>Rechercher</button>
+          </div>
             <div className='inscriptionContainer'>
               <p className='inscriptionTitle'>Inscrire un nouveau personnel  </p>
               <button className="add-people" onClick={()=>{setShowModal(true)}}>
