@@ -10,7 +10,9 @@ export async function getProfilData() {
       },
     });
     if (response.data && Array.isArray(response.data.data)) {
-      return response.data.data;
+      // Filtrer les profils pour exclure ceux avec le rôle 'admin'
+      const filteredData = response.data.data.filter((profil: { nom_profil: string }) => profil.nom_profil !== 'admin');
+      return filteredData;
     } else {
       console.error('Les données reçues ne sont pas sous forme de tableau.');
       return [];

@@ -22,7 +22,7 @@ const FeuilleRoutePage = ()=>{
   };
   const stops2 = trajetMatin?.courses;
 
-  const stops1 = trajetMatin?.courses;
+  const stops1 = trajetSoir?.courses;
 
   const destName1 = "Départ";
   const destName2 = "Etech";

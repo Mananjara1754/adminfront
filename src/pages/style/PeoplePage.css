@@ -326,4 +326,12 @@
   color: #999;
   cursor: not-allowed;
 }
+.delete-btn{
+  color: #f44336;
+  cursor: pointer;
+}
+.edit-btn{
+  color: rgb(35, 166, 207);
+  cursor: pointer;
+}
 

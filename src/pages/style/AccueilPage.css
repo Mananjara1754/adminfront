@@ -79,4 +79,26 @@
     gap:50px;
     
   }
+  .search-container{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap:10px;
+    justify-content: space-between;
+  }
+  .searchLabel{
+    width: 200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .labelSearch{
+    font-family: 'Poppins';
+    margin-left: 10px;
+  }
 
+@media (max-width: 407px) {
+  .searchLabel{
+    width: 250px;
+  }
+}
