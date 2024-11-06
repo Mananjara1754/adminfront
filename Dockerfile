@@ -12,7 +12,7 @@ RUN npm install
 
 # Copie le reste des fichiers du projet dans le conteneur
 COPY . .
-
+COPY .env ./
 # Construit l'application React pour la production
 RUN npm run build
 
@@ -21,3 +21,5 @@ EXPOSE 3000
 
 # Commande pour démarrer l'application
 CMD ["npm", "start"]
+
+ENV REACT_APP_API_BFF_ADMIN_URL=http://34.78.113.210/bff_admin
